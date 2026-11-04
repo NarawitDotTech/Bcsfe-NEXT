@@ -64,6 +64,7 @@ export type MapTargetKey =
 
 export class MapTarget {
   constructor(
+    public readonly key: MapTargetKey,
     public readonly save: SaveFile,
     public readonly chapters: ChaptersType,
     public readonly letter_code: string,
@@ -131,31 +132,31 @@ export class MapTarget {
 export function get_map_target(save: SaveFile, key: MapTargetKey): MapTarget {
   switch (key) {
     case "sol":
-      return new MapTarget(save, save.event_stages, "N", 0, 0);
+      return new MapTarget(key, save, save.event_stages, "N", 0, 0);
     case "event":
-      return new MapTarget(save, save.event_stages, "S", 1000, 1);
+      return new MapTarget(key, save, save.event_stages, "S", 1000, 1);
     case "collab":
-      return new MapTarget(save, save.event_stages, "C", 2000, 2);
+      return new MapTarget(key, save, save.event_stages, "C", 2000, 2);
     case "gauntlets":
-      return new MapTarget(save, save.gauntlets, "A", 24000);
+      return new MapTarget(key, save, save.gauntlets, "A", 24000);
     case "collab_gauntlets":
-      return new MapTarget(save, save.collab_gauntlets, "CA", 27000);
+      return new MapTarget(key, save, save.collab_gauntlets, "CA", 27000);
     case "behemoth_culling":
-      return new MapTarget(save, save.behemoth_culling, "Q", 31000);
+      return new MapTarget(key, save, save.behemoth_culling, "Q", 31000);
     case "enigma_clears":
-      return new MapTarget(save, save.enigma_clears, "H", 25000);
+      return new MapTarget(key, save, save.enigma_clears, "H", 25000);
     case "uncanny":
-      return new MapTarget(save, save.uncanny.chapters, "NA", 13000);
+      return new MapTarget(key, save, save.uncanny.chapters, "NA", 13000);
     case "catamin_stages":
-      return new MapTarget(save, save.catamin_stages.chapters, "B", 14000);
+      return new MapTarget(key, save, save.catamin_stages.chapters, "B", 14000);
     case "legend_quest":
-      return new MapTarget(save, save.legend_quest, "D", 16000);
+      return new MapTarget(key, save, save.legend_quest, "D", 16000);
     case "towers":
-      return new MapTarget(save, save.tower.chapters, "V", 7000);
+      return new MapTarget(key, save, save.tower.chapters, "V", 7000);
     case "zero_legends":
-      return new MapTarget(save, save.zero_legends, "ND", 34000);
+      return new MapTarget(key, save, save.zero_legends, "ND", 34000);
     case "dojo_catclaw_championships":
-      return new MapTarget(save, save.dojo_chapters, "G", 37000, null, true);
+      return new MapTarget(key, save, save.dojo_chapters, "G", 37000, null, true);
   }
 }
 
