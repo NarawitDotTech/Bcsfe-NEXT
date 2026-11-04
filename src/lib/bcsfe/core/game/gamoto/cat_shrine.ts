@@ -31,7 +31,7 @@ export class CatShrine {
   }
 
   static init(): CatShrine {
-    return new CatShrine(false, 0.0, 0.0, false, [], 0n);
+    return new CatShrine(false, 0.0, 0.0, false, [], BigInt(0));
   }
 
   static read(stream: Data): CatShrine {
