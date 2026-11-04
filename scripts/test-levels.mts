@@ -37,7 +37,7 @@ function seed(s: SaveFile) {
   s.gauntlets = gs(); s.collab_gauntlets = gs(); s.behemoth_culling = gs(); s.enigma_clears = gs();
   s.legend_quest = new LegendQuestChapters(times(60, () => LStars.init(3, 2)), times(60, () => 0), times(3, () => 0));
   const cs = () => new CChapters(times(60, () => CStars.init(3, 2)));
-  s.uncanny.chapters = cs(); s.catamin_stages.chapters = cs(); s.tower.chapters = cs();
+  s.uncanny.chapters = cs(); s.uncanny.unknown = times(60, () => 0); s.catamin_stages.chapters = cs(); s.catamin_stages.unknown = times(60, () => 0); s.tower.chapters = cs();
   const zl = () => new ZeroLegendsChapters(times(60, () => new ZStars(0, times(3, () => new ZChapter(0, 0, 0, times(3, () => new ZStage(0)))))));
   s.zero_legends = zl(); s.dojo_chapters = zl();
   s.aku = new AkuChapters([AStars.init(49, 1)]);
@@ -128,7 +128,7 @@ for (const key of ["gauntlets", "collab_gauntlets", "behemoth_culling", "enigma_
     const mo = M.load_map_option(save);
     const maps = M.list_maps(tg);
     console.log("   maps:", maps.length, "total:", tg.total_maps());
-    if (maps.length === 0) return;
+    assert.ok(maps.length > 0, key + " has maps");
     const ids = maps.slice(0, 2).map((m) => m.id);
     const stars = Math.max(1, M.get_max_max_stars(tg, mo, ids));
     M.set_progress_all(tg, ids, stars);

@@ -1,6 +1,7 @@
 /** Pure edit logic for the "other" feature group. */
 import type { SaveFile } from "@/lib/bcsfe/core/io/save";
 import { core_data } from "@/lib/bcsfe/core/core_data";
+import { strip_color_tags } from "@/lib/bcsfe/core/locale_handler";
 import { ConfigKey } from "@/lib/bcsfe/core/io/config";
 import { GamblingEvent } from "@/lib/bcsfe/core/game/catbase/gambling";
 import { PlayTime } from "@/lib/bcsfe/core/game/catbase/playtime";
@@ -88,8 +89,9 @@ export function rank_reward_options(
   save: SaveFile,
   choice: RankRewardChoice,
 ): { rank_gifts: RankGift[]; descriptions: string[] } | null {
-  return with_padded_rewards(save, false, () =>
+  const r = with_padded_rewards(save, false, () =>
     save.user_rank_rewards.get_selectable_rank_gifts(save, choice === "claim" ? 0 : 1));
+  return r === null ? null : { rank_gifts: r.rank_gifts, descriptions: r.descriptions.map(strip_color_tags) };
 }
 export function apply_rank_rewards(save: SaveFile, gifts: RankGift[], picked: number[], choice: RankRewardChoice): void {
   with_padded_rewards(save, true, () => save.user_rank_rewards.apply_claim(gifts, picked, choice === "claim" ? 0 : 1));

@@ -29,7 +29,7 @@ export default function TalentCats() {
   const needsAck = !status.ok && mode !== "remove";
   const blocked = needsAck && !ack;
 
-  const effective = sel.cats.length <= 1 ? "individual" : mode;
+  const effective = mode;
 
   const runMax = () => {
     const n = ce.max_talents_cats(save, sel.cats);
