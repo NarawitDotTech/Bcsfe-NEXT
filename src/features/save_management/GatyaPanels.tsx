@@ -4,7 +4,7 @@ import { useSave } from "@/components/editor/SaveContext";
 import { get_gatya_seed, set_gatya_seed, U32_MAX, type GatyaSeedKind } from "@/lib/bcsfe/edits/account";
 
 const TEXT: Record<GatyaSeedKind, { title: string; description: string }> = {
-  rare: { title: "Rare gacha seed", description: "Seed of the random generator used by rare gacha (platinum / legend capsules excluded). Same seed + same banner = same cats." },
+  rare: { title: "Rare gacha seed", description: "Seed of the random generator used by rare gacha. The same seed on the same banner gives the same results." },
   normal: { title: "Normal gacha seed", description: "Seed of the random generator used by the normal (cat ticket / XP) gacha." },
   event: { title: "Event gacha seed", description: "Seed of the random generator used by event gacha." },
 };

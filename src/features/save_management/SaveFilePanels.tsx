@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button, Checkbox, CopyButton, Field, Notice, Panel, Select } from "@/components/ui/primitives";
+import { Button, Checkbox, CopyButton, Field, Notice, Panel, Select, TextInput } from "@/components/ui/primitives";
 import { useSave } from "@/components/editor/SaveContext";
 import { useDownloadSave } from "@/components/editor/useDownloadSave";
 import { downloadBytes, errorText } from "@/components/editor/helpers";
@@ -213,11 +213,8 @@ export function ConvertVersionPanel() {
       </Notice>
       <Field label="Game version" hint="e.g. 12.2.1" error={touched && !gv ? "Enter a version like 12.2.1" : undefined}>
         {(id) => (
-          <input
-            id={id} value={text} onChange={(e) => setText(e.target.value)} onBlur={() => setTouched(true)} inputMode="decimal"
-            aria-invalid={touched && !gv}
-            className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
-          />
+          <TextInput id={id} value={text} onChange={(e) => setText(e.target.value)} onBlur={() => setTouched(true)}
+            inputMode="decimal" aria-invalid={touched && !gv} />
         )}
       </Field>
       <Button

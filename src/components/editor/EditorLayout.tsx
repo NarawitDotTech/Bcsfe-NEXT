@@ -62,7 +62,6 @@ export function EditorLayout() {
               <span className="hidden truncate text-sm text-muted sm:inline" title={fileName ?? undefined}>{fileName}</span>
             </div>
             <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
-              <span className="truncate sm:hidden max-w-[10rem]">{fileName}</span>
               <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono uppercase">{save.cc.get_code()}</span>
               <span>v{save.game_version.to_string()}</span>
               <span className={cn("inline-flex items-center gap-1", dirty ? "text-warning" : "text-muted")}>
@@ -71,8 +70,8 @@ export function EditorLayout() {
               </span>
             </p>
           </div>
-          <Button variant="primary" onClick={download}>Download<span className="hidden sm:inline">&nbsp;save</span></Button>
-          <Button onClick={() => (dirty ? setConfirmClose(true) : close())}>Close<span className="hidden sm:inline">&nbsp;save</span></Button>
+          <Button variant="primary" onClick={download}><span>Download<span className="hidden sm:inline"> save</span></span></Button>
+          <Button onClick={() => (dirty ? setConfirmClose(true) : close())}><span>Close<span className="hidden sm:inline"> save</span></span></Button>
         </div>
       </header>
 
