@@ -10,7 +10,7 @@ import SpecialSkills from "./SpecialSkills";
 import CatStorage from "./CatStorage";
 import CatOverview from "./CatOverview";
 
-const L = (key: string): string => strip_color_tags((en as Record<string, string>)[key] ?? key);
+const L = (key: string): string => strip_color_tags((en as Record<string, string>)[key] ?? "Cat list");
 
 const def = (key: string, component: FeatureDef["component"], aliases: string[], description: string, needsGameData = true): FeatureDef => ({
   key, category: "cats", label: L(key), aliases, description, needsGameData, component,
