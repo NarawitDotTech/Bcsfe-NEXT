@@ -105,7 +105,26 @@ export function save_from_json(text: string): SaveFile {
 }
 
 export function new_blank_save(cc: CountryCode, gv: GameVersion): SaveFile {
-  return new SaveFile(null, cc, false, gv);
+  const save = new SaveFile(null, cc, false, gv);
+  set_fresh_save_times(save);
+  return save;
+}
+
+/**
+ * SaveFile.init_save leaves every date / timestamp at 0 (1970). The game compares these with the
+ * server / device time, so a blank save must start "now" (same fields as fix_time_errors, plus the
+ * other save dates).
+ */
+export function set_fresh_save_times(save: SaveFile, now: Date = new Date()): void {
+  save.date = new Date(now);
+  save.date_2 = new Date(now);
+  save.date_3 = new Date(now);
+  save.date_4 = new Date(now);
+  save.year = now.getFullYear();
+  save.month = now.getMonth() + 1;
+  save.day = now.getDate();
+  save.timestamp = now.getTime() / 1000;
+  save.energy_penalty_timestamp = now.getTime() / 1000;
 }
 
 
