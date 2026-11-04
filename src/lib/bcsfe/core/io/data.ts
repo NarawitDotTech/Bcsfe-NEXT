@@ -517,7 +517,7 @@ export class Data {
     write_length = true,
     length: number | null = null,
   ): void {
-    this.write_list(value, (v) => this.write_int_tuple(v), [0, 0], write_length, length);
+    this.write_list(value, (v) => this.write_int_tuple(v), [0, 0] as [number, number], write_length, length);
   }
 
   write_int_bool_dict(value: Map<number, boolean>, write_length = true): void {
