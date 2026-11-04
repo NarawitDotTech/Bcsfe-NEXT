@@ -4,7 +4,7 @@
  * bg-surface, bg-surface-2, text-muted, border-border, text-accent, bg-accent,
  * text-danger, text-success, text-warning) so every panel looks consistent.
  */
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 export function cn(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
@@ -226,5 +226,73 @@ export function NumberGrid({ rows, onChange }: {
         <NumberField key={String(r.key)} label={r.label} value={r.value} max={r.max} onChange={(v) => onChange(r.key, v)} />
       ))}
     </div>
+  );
+}
+
+/** Determinate / indeterminate progress bar. `value` is 0..1; omit for indeterminate. */
+export function ProgressBar({ value, label }: { value?: number | null; label?: string }) {
+  const pct = value == null ? null : Math.max(0, Math.min(1, value)) * 100;
+  return (
+    <div
+      role="progressbar"
+      aria-label={label ?? "Progress"}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={pct == null ? undefined : Math.round(pct)}
+      className="h-2 w-full overflow-hidden rounded-full bg-surface-2"
+    >
+      <div
+        className={cn("h-full rounded-full bg-accent transition-[width]", pct == null && "w-1/3 animate-pulse")}
+        style={pct == null ? undefined : { width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+/** Modal dialog built on the native <dialog> element (focus trap + Escape for free). */
+export function Modal({ open, title, onClose, children, actions }: {
+  open: boolean; title: ReactNode; onClose: () => void; children?: ReactNode; actions?: ReactNode;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    else if (!open && d.open) d.close();
+  }, [open]);
+  return (
+    <dialog
+      ref={ref}
+      onClose={onClose}
+      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-xl border border-border bg-surface p-0 text-foreground backdrop:bg-black/50"
+    >
+      {open && (
+        <div className="space-y-4 p-4 sm:p-5">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          {children && <div className="space-y-3 text-sm">{children}</div>}
+          {actions && <div className="flex flex-wrap justify-end gap-2">{actions}</div>}
+        </div>
+      )}
+    </dialog>
+  );
+}
+
+/** Button that copies `text` to the clipboard and briefly confirms. */
+export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <Button
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setDone(true);
+          setTimeout(() => setDone(false), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      }}
+    >
+      {done ? "Copied" : label}
+    </Button>
   );
 }
