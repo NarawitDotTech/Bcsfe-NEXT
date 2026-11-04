@@ -17,6 +17,7 @@ import {
   save_from_json,
 } from "@/lib/bcsfe/edits/save_management";
 import { download_save } from "@/lib/bcsfe/edits/server_cli";
+import { useLatestVersions } from "@/components/editor/useLatestVersions";
 import { clear_tutorial } from "@/lib/bcsfe/edits/clear_tutorial";
 
 type Source = "file" | "transfer" | "json" | "new";
@@ -50,7 +51,13 @@ export function Landing() {
   const [transferCc, setTransferCc] = useState("en");
   // new save
   const [newCc, setNewCc] = useState("en");
-  const [newGv, setNewGv] = useState("15.5.0");
+  const [newGv, setNewGv] = useState("");
+  const [gvEdited, setGvEdited] = useState(false);
+  const { versions: latest, loading: latestLoading } = useLatestVersions();
+  const latestForCc = latest?.[newCc] ?? null;
+  useEffect(() => {
+    if (!gvEdited && latestForCc) setNewGv(latestForCc);
+  }, [latestForCc, gvEdited]);
   const [newClearTutorial, setNewClearTutorial] = useState(true);
   const [account, setAccount] = useState<{ save: SaveFile; transfer: string; confirm: string; inquiry: string; name: string } | null>(null);
 
@@ -159,7 +166,7 @@ export function Landing() {
 
   const parseNewGv = () => {
     const gv = parse_game_version(newGv);
-    if (!gv) setError({ message: "Invalid game version.", hint: "Use the format 15.5.0 (major.minor.patch) and match the version of the game installed on your device." });
+    if (!gv) setError({ message: "Invalid game version.", hint: "Use the format 15.6.1 (major.minor.patch) and match the version of the game installed on your device." });
     return gv;
   };
 
@@ -296,8 +303,10 @@ export function Landing() {
           <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); submitNew(); }}>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Country code">{(id) => <CcSelect id={id} value={newCc} onChange={setNewCc} />}</Field>
-              <Field label="Game version" hint="Must match the game installed on your device, e.g. 15.5.0">
-                {(id) => <TextInput id={id} value={newGv} onChange={(e) => setNewGv(e.target.value)} inputMode="decimal" />}
+              <Field label="Game version" hint={latestForCc
+                ? <>Latest {newCc.toUpperCase()} version: {latestForCc}{newGv !== latestForCc && <> · <button type="button" className="underline" onClick={() => { setGvEdited(false); setNewGv(latestForCc); }}>use latest</button></>}</>
+                : latestLoading ? "Checking the latest game version…" : "Could not check the latest version. Enter the version installed on your device."}>
+                {(id) => <TextInput id={id} value={newGv} placeholder="e.g. 15.6.1" onChange={(e) => { setGvEdited(true); setNewGv(e.target.value); }} inputMode="decimal" />}
               </Field>
             </div>
             <Checkbox label="Clear the tutorial" hint="The account starts past the opening tutorial." checked={newClearTutorial} onChange={setNewClearTutorial} />

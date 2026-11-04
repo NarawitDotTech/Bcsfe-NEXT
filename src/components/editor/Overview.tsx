@@ -1,6 +1,8 @@
 "use client";
 import { useMemo } from "react";
-import { Panel } from "@/components/ui/primitives";
+import { Button, Notice, Panel } from "@/components/ui/primitives";
+import { useLatestVersions } from "@/components/editor/useLatestVersions";
+import { GameVersion } from "@/lib/bcsfe/core/game_version";
 import { useSave } from "@/components/editor/SaveContext";
 import { formatPlayTime } from "@/components/editor/helpers";
 import { GameDataStatus } from "@/components/editor/PanelHost";
@@ -18,6 +20,9 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export function Overview({ onOpen }: { onOpen: (key: string) => void }) {
   const { save, version, gameData } = useSave();
+  const { versions: latestVersions } = useLatestVersions();
+  const latestText = latestVersions?.[save.cc.get_code()];
+  const outdated = latestText ? GameVersion.from_string(latestText).gt(save.game_version) : false;
   const stats = useMemo(() => {
     let rank = "-";
     try { rank = save.calculate_user_rank().toLocaleString(); } catch { /* partially loaded save */ }
@@ -42,6 +47,12 @@ export function Overview({ onOpen }: { onOpen: (key: string) => void }) {
 
   return (
     <div className="space-y-4">
+      {outdated && (
+        <Notice tone="warning">
+          This save is version {save.game_version.to_string()}; the latest {save.cc.get_code().toUpperCase()} release is {latestText}.
+          {" "}<Button className="ml-1" onClick={() => onOpen("convert_version")}>Update game version</Button>
+        </Notice>
+      )}
       <Panel title="Save overview" description="Pick a feature from the list to start editing. Changes stay in this tab until you download the save.">
         <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {stats.map(([l, v]) => <Stat key={l} label={l} value={v} />)}

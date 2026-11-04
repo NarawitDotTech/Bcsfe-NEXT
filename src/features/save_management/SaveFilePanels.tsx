@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useLatestVersions } from "@/components/editor/useLatestVersions";
+import { GameVersion } from "@/lib/bcsfe/core/game_version";
 import { Button, Checkbox, CopyButton, Field, Notice, Panel, Select, TextInput } from "@/components/ui/primitives";
 import { useSave } from "@/components/editor/SaveContext";
 import { useDownloadSave } from "@/components/editor/useDownloadSave";
@@ -206,12 +208,27 @@ export function ConvertVersionPanel() {
   const [text, setText] = useState(save.game_version.to_string());
   const gv = parse_game_version(text);
   const [touched, setTouched] = useState(false);
+  const { versions } = useLatestVersions();
+  const latestText = versions?.[save.cc.get_code()] ?? null;
+  const latest = latestText ? GameVersion.from_string(latestText) : null;
+  const apply = (v: GameVersion) => {
+    commit((s) => convert_game_version(s, v), `Game version set to ${v.to_string()}`);
+    setText(v.to_string());
+    loadGameData();
+  };
   return (
     <Panel title="Convert game version" description={`Current game version: ${save.game_version.to_string()}. Only changes the version number the editor writes into the save.`}>
       <Notice tone="warning">
         This may cause issues with your save. Bugs and crashes are expected. Open the cat base / upgrade menu in the game afterwards so it can make the necessary changes.
       </Notice>
-      <Field label="Game version" hint="e.g. 12.2.1" error={touched && !gv ? "Enter a version like 12.2.1" : undefined}>
+      {latest && (
+        <Notice tone={latest.gt(save.game_version) ? "warning" : "success"}>
+          Latest {save.cc.get_code().toUpperCase()} game version: <span className="font-mono">{latest.to_string()}</span>
+          {latest.gt(save.game_version) ? " — this save is older." : latest.eq(save.game_version) ? " — this save is up to date." : " — this save is newer than the latest known release."}
+          {!latest.eq(save.game_version) && <> <Button className="ml-2" onClick={() => apply(latest)}>Set to {latest.to_string()}</Button></>}
+        </Notice>
+      )}
+      <Field label="Game version" hint="e.g. 15.6.1" error={touched && !gv ? "Enter a version like 15.6.1" : undefined}>
         {(id) => (
           <TextInput id={id} value={text} onChange={(e) => setText(e.target.value)} onBlur={() => setTouched(true)}
             inputMode="decimal" aria-invalid={touched && !gv} />
@@ -220,9 +237,7 @@ export function ConvertVersionPanel() {
       <Button
         variant="primary" disabled={!gv || gv.eq(save.game_version)}
         onClick={() => {
-          if (!gv) return;
-          commit((s) => convert_game_version(s, gv), `Game version set to ${gv.to_string()}`);
-          loadGameData();
+          if (gv) apply(gv);
         }}
       >Convert game version</Button>
     </Panel>

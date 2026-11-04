@@ -1,5 +1,6 @@
 /** Port of bcsfe/cli/server_cli.py as pure async functions (no console I/O). */
 import type { CountryCode } from "@/lib/bcsfe/core/country_code";
+import { get_latest_version } from "@/lib/bcsfe/core/latest_version";
 import { GameVersion } from "@/lib/bcsfe/core/game_version";
 import type { SaveFile } from "@/lib/bcsfe/core/io/save";
 import {
@@ -33,7 +34,8 @@ export async function download_save(
   cc: CountryCode,
   on_status: StatusCallback | null = null,
 ): Promise<DownloadSaveResult> {
-  const gv = new GameVersion(120200); // not important
+  // Python sends a fixed 12.2.0 ("not important"); report the latest released version instead.
+  const gv = (await get_latest_version(cc)) ?? new GameVersion(120200);
   const [server_handler, result] = await ServerHandler.from_codes(
     transfer_code,
     confirmation_code,
