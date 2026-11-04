@@ -56,7 +56,7 @@ export default function TalentCats() {
         <Notice tone="warning">
           {status.data_version === null
             ? "No game data version is loaded, so talent data may be missing."
-            : <>The editor's game data ({status.data_version}) does not match this save's game version ({status.save_version}). Talents may not work as expected; the data should be updated within a few days of a game release.</>}
+            : <>The editor&apos;s game data ({status.data_version}) does not match this save&apos;s game version ({status.save_version}). Talents may not work as expected; the data should be updated within a few days of a game release.</>}
           {mode !== "remove" && <div className="mt-2"><Checkbox label="Continue anyway" checked={ack} onChange={setAck} /></div>}
         </Notice>
       )}

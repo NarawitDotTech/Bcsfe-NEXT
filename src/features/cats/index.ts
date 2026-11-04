@@ -17,7 +17,6 @@ const def = (key: string, component: FeatureDef["component"], aliases: string[],
 });
 
 export const features: FeatureDef[] = [
-  def("cat_overview", CatOverview, ["cat list", "cats table", "browse cats"], "Searchable table of all cats with inline unlock and level editing."),
   def("unlock_remove_cats", UnlockRemoveCats, ["unlock cats", "remove cats", "get cats"], "Unlock or remove cats from the save."),
   def("upgrade_cats", UpgradeCats, ["level", "upgrade", "max cats", "plus level"], "Set base and plus levels of cats."),
   def("true_form_remove_form_cats", TrueFormCats, ["true form", "evolve", "third form"], "Unlock or remove true forms."),
@@ -28,4 +27,5 @@ export const features: FeatureDef[] = [
   def("unlock_remove_cat_guide", CatGuide, ["cat guide", "picture book", "collection", "guide rewards"], "Claim or unclaim cat guide entries."),
   def("special_skills", SpecialSkills, ["base abilities", "cat cannon", "abilities", "special skill"], "Upgrade special skills (cat cannon, base abilities)."),
   def("cat_storage", CatStorage, ["storage", "cat box", "inventory"], "View, clear and add cats and special skills in cat storage."),
+  def("cat_overview", CatOverview, ["cat list", "cats table", "browse cats"], "Searchable table of all cats with inline unlock and level editing."),
 ];
