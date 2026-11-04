@@ -47,9 +47,9 @@ function flatten(raw: RawLocale): { props: Map<string, string>; metadata: Locale
   return { props, metadata };
 }
 
-/** Remove the `<@x>` / `</>` colour tags used in the locale strings (for plain-text UI). */
+/** Remove the `<@x>` / `</>` colour tags used in the locale strings (for plain-text UI) and unescape `\\<`. */
 export function strip_color_tags(text: string): string {
-  return text.replace(/<\/?[@a-zA-Z]*>/g, (m) => (m === "</>" || /^<@\w*>$/.test(m) || m === "</t>" ? "" : m));
+  return text.replace(/<@\w*>|<\/\w*>/g, "").replace(/\\([<>/])/g, "$1");
 }
 
 export class LocalManager {
