@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BCSFE Web
 
-## Getting Started
+A Next.js web port of [BCSFE-Python](https://github.com/fieryhenry/BCSFE-Python) by fieryhenry, the Battle Cats save file editor (GPL-3.0).
 
-First, run the development server:
+Save files are parsed and edited entirely in your browser. Only game-server calls (transfer codes, uploads, event data) and game-data downloads go through this app's `/api/proxy` route, because those hosts do not allow cross-origin requests. The route forwards only to an allowlist of hosts.
 
+## Features
+All features of the Python CLI menu (see `FEATURES.md`), grouped like the original:
+- **Save management**: load from file / transfer code / JSON / new save, download, upload to get transfer codes, export JSON, convert region and game version.
+- **Items**: catfood, XP, all tickets, rare ticket trade, platinum shards, NP, leadership, battle items (incl. endless), catseyes, catfruit, talent orbs, catamins, scheme items, labyrinth medals, event tickets, treasure chests and more.
+- **Cats**: advanced cat selection, unlock/remove, upgrade (`base+plus` grammar), true and ultra forms, talents, cat guide, special skills, cat storage, plus a cat list.
+- **Levels**: story, treasures, ITF timed scores, events, collabs, gauntlets, uncanny, catamin stages, legend quest, towers, zero legends, outbreaks, aku realm, enigma, dojo and more.
+- **Gamatoto / Ototo**, **Account**, **Gacha seeds**, **Fixes**, **Other** (slots, play time, enemy guide, user rank rewards, gold pass, medals, missions…), **Settings**.
+
+Not available in a browser: adb / root / WayDroid push and pull.
+
+## Development
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
+npm run typecheck
+npm test             # byte-exact save round-trip tests (tests/fixtures)
+```
+Edit-level tests with real game data:
+```bash
+BCSFE_GAME_DATA=/path/to/en.tar.xz npx tsx --tsconfig tsconfig.json scripts/test-cats.mts   # also test-items/levels/other
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Layout
+- `src/lib/bcsfe/core` – line-by-line port of the Python `bcsfe/core` (save format, game modules, server, game data).
+- `src/lib/bcsfe/edits` – pure versions of the CLI edit flows.
+- `src/features/*` – one panel per feature, registered in `src/features/registry.ts`.
+- `src/components` – app shell, save state and UI kit.
+- See `PORTING.md` for the conventions used.
