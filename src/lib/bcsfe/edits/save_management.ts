@@ -151,6 +151,9 @@ export async function create_ready_account(
   const created = await unban_account(save, on_status);
   const inquiry_code: string | null = save.inquiry_code || null;
   if (!created) return { ok: false, save, step: "account", inquiry_code };
+  // A blank save says "no account yet" (has_account = 0) while carrying a registered inquiry code.
+  // Saves of real registered accounts have this flag set.
+  save.has_account = 1;
   const codes = await upload_save_get_codes(save, true, on_status);
   if (!codes) return { ok: false, save, step: "upload", inquiry_code };
   return { ok: true, save, transfer_code: codes[0], confirmation_code: codes[1], inquiry_code: save.inquiry_code };
