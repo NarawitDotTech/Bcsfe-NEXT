@@ -20,7 +20,7 @@ const RELOAD_GAME_DATA = new Set<ConfigKey>([ConfigKey.LOCALE, ConfigKey.FORCE_L
 
 function describe(entry: ConfigEntry): string {
   const text = strip_color_tags(core_data.local_manager.get_key(entry.desc_key, { current_value: "", default_value: "" }));
-  return text.replace(/\s*\(current value:.*$/s, "").trim();
+  return text.replace(/\s*\(current value:.*$/s, "").replace(/:$/, "").trim();
 }
 
 function SettingRow({ entry, onChanged }: { entry: ConfigEntry; onChanged: (key: ConfigKey) => void }) {
@@ -46,7 +46,7 @@ function SettingRow({ entry, onChanged }: { entry: ConfigEntry; onChanged: (key:
     return <Checkbox label={label} hint={hint} checked={Boolean(value)} onChange={set} />;
   }
   if (entry.type === "int") {
-    return <NumberField label={label} hint={hint} value={Number(value)} min={entry.min} max={entry.max === 2147483647 ? undefined : entry.max} onChange={set} />;
+    return <NumberField label={label} hint={hint} value={Number(value)} min={entry.min} max={entry.key === ConfigKey.MAX_REQUEST_TIMEOUT || entry.max === 2147483647 ? undefined : entry.max} onChange={set} />;
   }
   const dirty = draft !== String(value);
   return (

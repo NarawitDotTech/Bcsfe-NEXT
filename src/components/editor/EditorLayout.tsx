@@ -81,9 +81,8 @@ export function EditorLayout() {
           className={cn(
             "z-50 w-72 flex-none border-r border-border bg-surface",
             "fixed inset-y-0 left-0 transition-transform md:sticky md:top-[3.5rem] md:z-auto md:h-[calc(100dvh-3.5rem)] md:translate-x-0",
-            drawer ? "translate-x-0" : "-translate-x-full",
+            drawer ? "translate-x-0" : "-translate-x-full max-md:invisible",
           )}
-          aria-hidden={undefined}
         >
           <div className="flex items-center justify-between border-b border-border px-3 py-2 md:hidden">
             <span className="font-semibold">Features</span>
