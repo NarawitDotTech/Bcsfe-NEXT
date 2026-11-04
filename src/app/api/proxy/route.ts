@@ -108,6 +108,8 @@ async function handle(req: NextRequest): Promise<Response> {
     if (!SKIP_RESPONSE_HEADERS.has(name.toLowerCase())) out.set(name, value);
   });
   out.set("x-proxy-final-url", current.toString());
+  const upstream_len = upstream.headers.get("content-length");
+  if (upstream_len) out.set("x-upstream-content-length", upstream_len);
   out.set("cache-control", "no-store");
   const noBody = upstream.status === 204 || upstream.status === 205 || upstream.status === 304 || method === "HEAD";
   const buf = noBody ? null : await upstream.arrayBuffer();
