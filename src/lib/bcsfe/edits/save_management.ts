@@ -9,6 +9,7 @@ import { StoryChapters } from "@/lib/bcsfe/core/game/map/story";
 import type { StatusCallback } from "@/lib/bcsfe/core/server/server_handler";
 import { unban_account } from "@/lib/bcsfe/edits/account";
 import { upload_save_get_codes } from "@/lib/bcsfe/edits/server_cli";
+import { clear_tutorial } from "@/lib/bcsfe/edits/clear_tutorial";
 
 /** FeatureHandler.do_save_actions: runs on load (and before every feature in the CLI). */
 export function do_save_actions(save_file: SaveFile): void {
@@ -107,3 +108,31 @@ export function new_blank_save(cc: CountryCode, gv: GameVersion): SaveFile {
   return new SaveFile(null, cc, false, gv);
 }
 
+
+export type ReadyAccountResult =
+  | { ok: true; save: SaveFile; transfer_code: string; confirmation_code: string; inquiry_code: string }
+  | { ok: false; save: SaveFile; step: "account" | "upload"; inquiry_code: string | null };
+
+/**
+ * Creates a ready-to-use account from scratch:
+ *  1. a blank save for `cc` / `gv` (SaveFile.init_save),
+ *  2. optionally with the tutorial cleared (StoryChapters.clear_tutorial),
+ *  3. registers a brand new account with the game server (new inquiry code, password, auth token),
+ *  4. uploads the save and returns the transfer + confirmation codes to enter in the game.
+ * This contacts the real game servers and creates a real account.
+ */
+export async function create_ready_account(
+  cc: CountryCode,
+  gv: GameVersion,
+  options: { clear_tutorial?: boolean } = {},
+  on_status: StatusCallback | null = null,
+): Promise<ReadyAccountResult> {
+  const save = new_blank_save(cc, gv);
+  if (options.clear_tutorial ?? true) clear_tutorial(save);
+  const created = await unban_account(save, on_status);
+  const inquiry_code: string | null = save.inquiry_code || null;
+  if (!created) return { ok: false, save, step: "account", inquiry_code };
+  const codes = await upload_save_get_codes(save, true, on_status);
+  if (!codes) return { ok: false, save, step: "upload", inquiry_code };
+  return { ok: true, save, transfer_code: codes[0], confirmation_code: codes[1], inquiry_code: save.inquiry_code };
+}

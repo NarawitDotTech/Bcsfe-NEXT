@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Field, Notice, Segmented, Select, TextInput, cn } from "@/components/ui/primitives";
+import { Button, Checkbox, CopyButton, Field, Notice, Segmented, Select, TextInput, cn } from "@/components/ui/primitives";
 import { useSaveContext } from "@/components/editor/SaveContext";
 import { errorText, formatBytes, statusText } from "@/components/editor/helpers";
 import { forgetRecent, listRecent, rememberSave, type RecentSave } from "@/components/editor/recent";
@@ -10,12 +10,14 @@ import { CantDetectSaveCCError, type SaveFile } from "@/lib/bcsfe/core/io/save";
 import {
   all_country_codes,
   apply_load_actions,
+  create_ready_account,
   new_blank_save,
   parse_game_version,
   save_from_bytes,
   save_from_json,
 } from "@/lib/bcsfe/edits/save_management";
 import { download_save } from "@/lib/bcsfe/edits/server_cli";
+import { clear_tutorial } from "@/lib/bcsfe/edits/clear_tutorial";
 
 type Source = "file" | "transfer" | "json" | "new";
 
@@ -49,6 +51,8 @@ export function Landing() {
   // new save
   const [newCc, setNewCc] = useState("en");
   const [newGv, setNewGv] = useState("15.5.0");
+  const [newClearTutorial, setNewClearTutorial] = useState(true);
+  const [account, setAccount] = useState<{ save: SaveFile; transfer: string; confirm: string; inquiry: string; name: string } | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
@@ -153,18 +157,52 @@ export function Landing() {
     setStatus(null);
   };
 
+  const parseNewGv = () => {
+    const gv = parse_game_version(newGv);
+    if (!gv) setError({ message: "Invalid game version.", hint: "Use the format 15.5.0 (major.minor.patch) and match the version of the game installed on your device." });
+    return gv;
+  };
+
   const submitNew = () => {
     setError(null);
-    const gv = parse_game_version(newGv);
-    if (!gv) {
-      setError({ message: "Invalid game version.", hint: "Use the format 15.5.0 (major.minor.patch)." });
-      return;
-    }
+    const gv = parseNewGv();
+    if (!gv) return;
     try {
-      complete(new_blank_save(new CountryCode(newCc), gv), `new-${newCc}-${gv.to_string()}`);
+      const save = new_blank_save(new CountryCode(newCc), gv);
+      if (newClearTutorial) clear_tutorial(save);
+      complete(save, `new-${newCc}-${gv.to_string()}`);
     } catch (e) {
       setError({ message: `Could not create a new save: ${errorText(e)}` });
     }
+  };
+
+  const submitAccount = async () => {
+    setError(null);
+    setAccount(null);
+    const gv = parseNewGv();
+    if (!gv) return;
+    setBusy(true);
+    setStatus("Creating a new account...");
+    try {
+      const r = await create_ready_account(new CountryCode(newCc), gv, { clear_tutorial: newClearTutorial }, (k) => setStatus(statusText(k)));
+      if (r.ok) {
+        setAccount({ save: r.save, transfer: r.transfer_code, confirm: r.confirmation_code, inquiry: r.inquiry_code, name: `account-${r.transfer_code}` });
+      } else if (r.step === "account") {
+        setError({
+          message: "The game server did not create a new account.",
+          hint: "Check your internet connection and try again in a moment. The server may also be under maintenance.",
+        });
+      } else {
+        setError({
+          message: "The account was created, but uploading the save failed, so no transfer code was issued.",
+          hint: "Try again. You can also open the save in the editor and use \"Upload save to server\" from Save Management.",
+        });
+      }
+    } catch (e) {
+      setError({ message: `Creating the account failed: ${errorText(e)}` });
+    }
+    setBusy(false);
+    setStatus(null);
   };
 
   const openRecent = (r: RecentSave) => {
@@ -256,17 +294,42 @@ export function Landing() {
 
         {source === "new" && (
           <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); submitNew(); }}>
-            <Notice tone="warning">
-              Many features will not work with a generated save. Load it in the game once, then bring it back here.
-            </Notice>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Country code">{(id) => <CcSelect id={id} value={newCc} onChange={setNewCc} />}</Field>
-              <Field label="Game version" hint="e.g. 15.5.0">
+              <Field label="Game version" hint="Must match the game installed on your device, e.g. 15.5.0">
                 {(id) => <TextInput id={id} value={newGv} onChange={(e) => setNewGv(e.target.value)} inputMode="decimal" />}
               </Field>
             </div>
-            <Button type="submit" variant="primary" disabled={busy}>Create new save</Button>
+            <Checkbox label="Clear the tutorial" hint="The account starts past the opening tutorial." checked={newClearTutorial} onChange={setNewClearTutorial} />
+            <Notice tone="info">
+              <span className="font-medium">Create account & get transfer code</span> registers a brand-new account with the
+              game server, uploads this save to it, and gives you a transfer code and confirmation code. Enter them in the game
+              under Settings → Data Transfer to start playing on the new account.
+            </Notice>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="primary" disabled={busy} onClick={submitAccount}>Create account & get transfer code</Button>
+              <Button type="submit" disabled={busy}>Create save only (offline)</Button>
+            </div>
           </form>
+        )}
+
+        {account && (
+          <div className="space-y-3 rounded-lg border border-success/40 bg-success/10 p-4">
+            <p className="font-medium text-success">Account created. Enter these codes in the game to use it.</p>
+            <dl className="grid gap-2 text-sm sm:grid-cols-[auto_1fr_auto] sm:items-center">
+              <dt className="text-muted">Transfer code</dt>
+              <dd className="font-mono text-base">{account.transfer}</dd>
+              <dd><CopyButton text={account.transfer} /></dd>
+              <dt className="text-muted">Confirmation code</dt>
+              <dd className="font-mono text-base">{account.confirm}</dd>
+              <dd><CopyButton text={account.confirm} /></dd>
+              <dt className="text-muted">Inquiry code</dt>
+              <dd className="font-mono">{account.inquiry}</dd>
+              <dd><CopyButton text={account.inquiry} /></dd>
+            </dl>
+            <p className="text-xs text-muted">Codes are shown only once. Transfer codes can be used a limited number of times; after the game loads the save, the codes are used up.</p>
+            <Button onClick={() => { const a = account; setAccount(null); complete(a.save, a.name); }}>Open this save in the editor</Button>
+          </div>
         )}
 
         {busy && status && <p role="status" className="text-sm text-muted">{status}</p>}
