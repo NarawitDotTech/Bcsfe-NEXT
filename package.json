@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "tsx --tsconfig tsconfig.json scripts/roundtrip-test.ts tests/fixtures",
+    "typecheck": "tsc --noEmit -p ."
   },
   "dependencies": {
     "@noble/hashes": "^2.4.0",
@@ -24,6 +26,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

@@ -51,3 +51,21 @@ Import with the `@/lib/bcsfe/...` alias. **Never** import a barrel/index file; i
 * TypeScript strict; avoid `any` (use `unknown` + narrowing when parsing JSON).
 * Check your own files compile: `npx tsc --noEmit -p . 2>&1 | grep -E "<your paths>"` (other agents' files may be mid-edit; ignore their errors).
 * Do not run `git commit`, do not edit files owned by other agents, do not run `npm install` unless your task says so.
+
+## Web UI (wave 2)
+* Feature inventory of the CLI (menu tree, inputs, effects, game data): `FEATURES.md`. Every feature listed there must get a panel unless it is impossible in a browser (adb/root/waydroid).
+* Edits layer: port `PY/cli/edits/*.py` (and any interactive `edit_*` flows in core modules) to pure functions in `src/lib/bcsfe/edits/<name>.ts`.
+  No prompts/printing — take parameters, return results. Panels call these.
+* Panels: `src/features/<group>/<FeatureName>.tsx` (client components), registered in `src/features/<group>/index.ts`
+  as `FeatureDef` (`src/features/types.ts`). Feature `key` = Python feature key, unique app-wide.
+* State: `useSave()` from `@/components/editor/SaveContext` gives `{ save, version, commit, notify, gameData }`.
+  Mutate the SaveFile then call `commit()` (or `commit(s => ..., "Saved 3 cats")`). Recompute derived data with `version` as a memo dependency.
+  If `needsGameData` is set, the shell only renders the panel when game data is ready (`core_data.*` getters work synchronously then).
+* UI kit: `@/components/ui/primitives` (Panel, Button, Field, TextInput, Select, NumberField, NumberGrid, Checkbox, Notice, Segmented, MultiSelect).
+  Use theme tokens (`bg-surface`, `bg-surface-2`, `text-muted`, `border-border`, `text-accent`, `bg-accent`, `text-danger` ...), never raw hex colours.
+  Must work at 375px width. Verb-first button labels ("Apply", "Unlock cats"); show a success notify after applying.
+  Locale strings may contain `<@t>..</>` colour tags — use `strip_color_tags` from `@/lib/bcsfe/core/locale_handler` for plain text.
+* Max values: `core_data.max_value_manager` (respect config `DISABLE_MAXES`).
+* Node testing of edits with real game data: `scripts/node-game-data.ts` (`loadGameDataForSave(save, process.env.BCSFE_GAME_DATA)`),
+  see `scripts/smoke-game-data.mts`. EN 15.0 archive: `/tmp/claude-0/-home-user-Bcsfe-NEXT/6bd7b2fe-89da-55e7-9504-8ba6327e1d10/scratchpad/dl/en.tar.xz`.
+  Fixture saves: `tests/fixtures/*.sav`. Run `npm test` (round-trip) after touching core files, and `npm run typecheck`.
