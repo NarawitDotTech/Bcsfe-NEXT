@@ -3,7 +3,7 @@ import type { SaveFile } from "@/lib/bcsfe/core/io/save";
 import type { Cat, UnitBuy, UnitBuyCatData, UnitLimitCatData } from "@/lib/bcsfe/core/game/catbase/cat";
 import type { RankGifts } from "@/lib/bcsfe/core/game/catbase/user_rank_rewards";
 import { core_data } from "@/lib/bcsfe/core/core_data";
-import { ConfigKey } from "@/lib/bcsfe/core/config";
+import { ConfigKey } from "@/lib/bcsfe/core/io/config";
 
 export class PowerUpHelper {
   unit_limit: UnitLimitCatData | null;

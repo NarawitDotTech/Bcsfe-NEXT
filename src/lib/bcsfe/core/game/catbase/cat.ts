@@ -4,7 +4,7 @@ import type { SaveFile } from "@/lib/bcsfe/core/io/save";
 import type { GameVersion } from "@/lib/bcsfe/core/game_version";
 import { CSV, Delimeter, Row } from "@/lib/bcsfe/core/io/bc_csv";
 import { core_data } from "@/lib/bcsfe/core/core_data";
-import { ConfigKey } from "@/lib/bcsfe/core/config";
+import { ConfigKey } from "@/lib/bcsfe/core/io/config";
 import { Upgrade } from "@/lib/bcsfe/core/game/catbase/upgrade";
 import { mapToObject, objectToMap, times } from "@/lib/bcsfe/core/utils";
 

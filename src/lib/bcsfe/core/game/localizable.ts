@@ -19,7 +19,6 @@ export class Localizable {
     const csv = new CSV(data, "\t");
     const keys: Record<string, string> = Object.create(null);
     for (const line of csv) {
-      if (line.length < 2) continue; // Python: IndexError -> skipped (row[] there returns empty cell, so keep only full rows)
       keys[line.get(0).to_str()] = line.get(1).to_str();
     }
     return keys;
